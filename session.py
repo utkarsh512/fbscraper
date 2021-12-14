@@ -107,7 +107,7 @@ class Session:
         postURLs = list()
         for i in range(len(filteredLinks) // 4):
             postURLs.append(f"{MBASIC_URL}{filteredLinks[4 * i + 1]}")
-        return postURLs[:nPosts]
+        return postURLs
 
     def _parsePage(self):
         soup = bs(self._browser.page_source, "lxml")
