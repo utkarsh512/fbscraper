@@ -40,7 +40,7 @@ class Session:
         """
         self._credentials = credentials
         self._kwargs = dict()
-        option = Options()
+        option = ChromeOptions()
         option.add_argument('--headless')
         option.add_argument('--no-sandbox')
         option.add_argument('--disable-dev-shm-usage')
