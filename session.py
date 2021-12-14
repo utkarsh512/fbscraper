@@ -78,7 +78,7 @@ class Session:
 
     def getPostURLs(self,
                     pageID,
-                    nPosts):
+                    nScrolls):
         """routine to extract the post urls from a given page
         -----------------------------------------------------
         Input:
@@ -90,7 +90,7 @@ class Session:
         """
         pageURL = f"{MOBILE_URL}/{pageID}"
         self._browser.get(pageURL)
-        self._scroll(nPosts * 3 + 10)
+        self._scroll(nScrolls)
         soup = bs(self._browser.page_source, "html.parser")
         linkElements = soup.findAll("a")
         rawLinks = list()
@@ -111,6 +111,7 @@ class Session:
         return postURLs
 
     def _parsePage(self):
+        """routine to parse the page metadata and return it as a dictionary"""
         soup = bs(self._browser.page_source, "lxml")
         metadata = str(soup.find("script"))
         idx = 0
@@ -121,6 +122,11 @@ class Session:
 
     def _parsePost(self,
                    metadata):
+        """routine to parse metadata of a given post from the metadata dictionary
+        -------------------------------------------------------------------------
+        Input:
+        :param metadata: dictionary as returned by self._parsePage() method
+        """
         self._kwargs["post"]["time"] = metadata["dateCreated"]
         self._kwargs["post"]["text"] = metadata["articleBody"]
         self._kwargs["post"]["url"] = metadata["url"]
@@ -135,11 +141,21 @@ class Session:
         self._kwargs["post"]["identifier"] = metadata["identifier"]
 
     def _getNext(self):
+        """routine to extract the link to more comments"""
         soup = bs(self._browser.page_source, "lxml")
-        return soup.find("div", id=f"see_next_{self.posts[-1]['identifier'].split(';')[1]}")
+        element = soup.find("div", id=f"see_next_{self.posts[-1]['identifier'].split(';')[1]}")
+        nextLink = None
+        if element is not None:
+            nextLink = f"{MBASIC_URL}{element.a['href']}"
+        return nextLink
 
     def _extract(self,
                  postURL):
+        """routine to iteratively extract post comments
+        -----------------------------------------------
+        Input:
+        :param postURL: URL of the post
+        """
         self._browser.get(postURL)
         delay()
         metadata = self._parsePage()
@@ -150,7 +166,8 @@ class Session:
         if self._kwargs["nComments"] == len(self._kwargs["post"]["comments"]):
             return
         nextLink = self._getNext()
-        self._extract(nextLink)
+        if nextLink is not None:
+            self._extract(nextLink)
         
     def getPost(self,
                 postURL,
@@ -180,3 +197,4 @@ class Session:
     def close(self):
         """Routine to close the session"""
         self._browser.close()
+ 
