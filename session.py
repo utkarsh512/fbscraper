@@ -41,14 +41,9 @@ class Session:
         self._credentials = credentials
         self._kwargs = dict()
         option = Options()
-        option.add_argument("--disable-infobars")
-        option.add_argument("start-maximized")
-        option.add_argument("--disable-extensions")
-
-        # Pass the argument 1 to allow and 2 to block
-        option.add_experimental_option("prefs", {
-            "profile.default_content_setting_values.notifications": 1
-        })
+        option.add_argument('--headless')
+        option.add_argument('--no-sandbox')
+        option.add_argument('--disable-dev-shm-usage')
         self._browser = webdriver.Chrome(executable_path=chromeDriverPath, options=option)
         self._login()
 
