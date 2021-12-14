@@ -5,6 +5,7 @@ Copyright (c) 2021 Utkarsh Patel
 import time
 import numpy as np
 import json
+import pickle as pkl
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -142,11 +143,11 @@ class Session:
         self._browser.get(postURL)
         delay()
         metadata = self._parsePage()
-        nCommentsRequired = self._self._kwargs["nComments"] - len(self._kwargs["post"]["comments"])
-        nCommentsRequired = min(nCommentsRequired, len(metadata["comments"]))
-        self._kwargs["post"]["comments"].extend(metadata["comments"][:nCommentsRequired])
+        nCommentsRequired = self._kwargs["nComments"] - len(self._kwargs["post"]["comments"])
+        nCommentsRequired = min(nCommentsRequired, len(metadata["comment"]))
+        self._kwargs["post"]["comments"].extend(metadata["comment"][:nCommentsRequired])
         self._kwargs["pbar"].update(nCommentsRequired)
-        if self._self._kwargs["nComments"] == len(self._kwargs["post"]["comments"]):
+        if self._kwargs["nComments"] == len(self._kwargs["post"]["comments"]):
             return
         nextLink = self._getNext()
         self._extract(nextLink)
@@ -173,10 +174,9 @@ class Session:
         self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
         with tqdm(total=self._kwargs["nComments"], desc="Comments") as self._kwargs["pbar"]:
             self._extract(postURL)
-        with open(dumpAs, "ab", encoding="utf-8") as f:
+        with open(dumpAs, "ab") as f:
             pkl.dump(self._kwargs["post"], f)
 
-    def close():
+    def close(self):
         """Routine to close the session"""
         self._browser.close()
- 
