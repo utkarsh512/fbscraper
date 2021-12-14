@@ -7,7 +7,6 @@ import numpy as np
 import json
 from tqdm import tqdm
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
 
@@ -31,7 +30,7 @@ class URLError(Exception):
 class Session:
     def __init__(self,
                  credentials,
-                 chromeDriverPath="./chromedriver"):
+                 chromeDriverPath="chromedriver"):
         """Routine to inititialize a session
         ------------------------------------
         Input:
@@ -40,7 +39,7 @@ class Session:
         """
         self._credentials = credentials
         self._kwargs = dict()
-        option = ChromeOptions()
+        option = webdriver.ChromeOptions()
         option.add_argument('--headless')
         option.add_argument('--no-sandbox')
         option.add_argument('--disable-dev-shm-usage')
