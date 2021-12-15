@@ -7,7 +7,7 @@ Scraping posts, comments and replies from Facebook using selenium and beautifuls
 ## How to use
 First of all, create a `Session` object for scraping:
 ```python3
-from fbscraper import Session
+from scraper import Session
 sess = Session(
     credentials=(EMAIL, 
                  PASSWORD), 
