@@ -31,5 +31,10 @@ sess.getPost(
 ```
 where `postURL` is URL of the post we are interested in, `dumpAs` is the name of binary file to which we are __appending__ this post and `nComments` is the upper-bound on number of comments. Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
 
+Done with scraping! Remember to close the session as 
+```python3
+sess.close()
+```
+
 ## TO-DO
 * Extracting replies along with comments
