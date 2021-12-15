@@ -7,6 +7,7 @@ import time
 import numpy as np
 import json
 import cssutils
+import pickle as pkl
 from constants import (W3_BASE_URL,
                        MBASIC_URL)
 import logging
@@ -18,6 +19,24 @@ CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 def delay():
     """delay for 5-15 seconds"""
     time.sleep(np.random.randint(5, 15))
+
+def PKLtoJSON(old, new):
+    """routine to convert the pickled dataset (as used in scraper) to JSON
+    ---------------------------------------------------------------------
+    Input:
+    :param old: path to PKL dataset
+    :param new: path to JSON dataset
+    """
+    posts = list()
+    with open(old, "rb") as reader:
+        try:
+            while True:
+                posts.append(pkl.load(reader))
+        except EOFError:
+            pass
+    with open(new, "w", encoding="utf-8") as writer:
+        writer.write(json.dumps(posts, indent=4))
+
 
 def getLinks(soup, filter=None):
     """routine to extract all hyperlinks from the given soup element with filtering"""
