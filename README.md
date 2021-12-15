@@ -1,5 +1,5 @@
 # fbscraper
-Scraping posts and comments from Facebook using selenium and beautifulsoup.
+Scraping posts, comments and replies from Facebook using selenium and beautifulsoup.
 ## How to use
 First of all, create a `Session` object for scraping:
 ```python3
@@ -26,15 +26,21 @@ As you now have the list of URLs for the required posts, post data (including co
 sess.getPost(
     postURL="https://mbasic.facebook.com/story.php?...",
     dumpAs="posts.pkl",
-    nComments=1000
+    nComments=1000,
+    getReplies=True,
+    nReplies=10
 )
 ```
-where `postURL` is URL of the post we are interested in, `dumpAs` is the name of binary file to which we are __appending__ this post and `nComments` is the upper-bound on number of comments. Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
+where 
+* `postURL` is the URL of the post
+* `dumpAs` is the name of binary file used for appending the post
+* `nComments` is the upper-bound on number of comments per post
+* `getReplies` should be `True` if you want to scrape replies as well
+* `nReplies` is the upper-bound on number of replies per comment
+
+Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
 
 Done with scraping! Remember to close the session as 
 ```python3
 sess.close()
 ```
-
-## TO-DO
-* Extracting replies along with comments
