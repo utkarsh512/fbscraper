@@ -1,4 +1,4 @@
-"""fbscraper.py - Scraping posts, comments and replies from public Facebook pages
+"""scraper.py - Scraping posts, comments and replies from public Facebook pages
 Copyright (c) 2021 Utkarsh Patel
 """
 
