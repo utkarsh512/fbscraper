@@ -1,4 +1,4 @@
-"""session.py - Creating a session for scraping posts, comments and replies from public Facebook pages
+"""fbscraper.py - Scraping posts and comments from public Facebook pages
 Copyright (c) 2021 Utkarsh Patel
 """
 
@@ -83,7 +83,7 @@ class Session:
         -----------------------------------------------------
         Input:
         :param pageID: unique ID of the page
-        :param nPosts: number of post for which URL is required
+        :param nScrolls: number of scrolls required
 
         Output:
         returns a list containing the URLs
