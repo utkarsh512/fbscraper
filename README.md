@@ -1,4 +1,4 @@
-# FacebookScraper
+# fbscraper
 Scraping posts and comments from Facebook using selenium and beautifulsoup.
 ## How to use
 First of all, create a `Session` object for scraping:
