@@ -1,3 +1,7 @@
+"""utils.py - Getters and parsers for fbscraper
+Copyright (c) 2021 Utkarsh Patel
+"""
+
 import re
 import time
 import numpy as np
@@ -36,7 +40,7 @@ def getLinks(soup, filter=None):
 def getMoreCommentsLink(soup, postID):
     """routine to extract the 'more comments' link in the page
     returns None if it doesn't exists"""
-    element = soup.find("div", id=f"see_next_{postID.split(';')[1]}")
+    element = soup.find("div", id=f"see_next_{postID}")
     nextLink = None
     if element is not None:
         nextLink = f"{MBASIC_URL}{element.a['href']}"
@@ -51,8 +55,8 @@ def getMoreRepliesLink(soup, commentID):
         nextLink = f"{MBASIC_URL}{element.a['href']}"
     return nextLink
 
-def getReplyClass(soup):
-    """routine to find the div class for replies"""
+def getDivClass(soup):
+    """routine to find the div class for comments/replies"""
     css = soup.find('style').text[32:-22]
     dct = parseCSS(css)
     candidates = list()
@@ -61,13 +65,24 @@ def getReplyClass(soup):
             candidates.append(k)
     return candidates[-1][-2:]
 
-def getReplyDivs(divs):
-    """routine to filter elements corresponding to a reply"""
+def getFilteredDivs(divs):
+    """routine to filter elements corresponding to a comment/reply"""
     filtered = list()
     for div in divs:
         if len(div.get("class")) == 1:
             filtered.append(div)
     return filtered
+
+def getRepliesLink(div, divID):
+    """routine to get reply link a comment"""
+    element = div.find("div", id=f"comment_replies_more_1:{divID}")
+    repliesLink = None
+    if element is not None:
+        try:
+            repliesLink = f"{MBASIC_URL}{element.div.a['href']}"
+        except:
+            pass
+    return repliesLink
 
 def parsePageScript(soup):
     """routine to parse content of <script> tag"""
@@ -104,6 +119,19 @@ def parseCSS(css):
         except:
             pass
     return dct
+
+def parseComment(div, postID):
+    identifier = f"{postID}_{div.get('id')}"
+    return dict(
+        author=dict(
+            name=re.sub(CLEANR, "", div.div.h3.text),
+            url=f"{W3_BASE_URL}{div.div.h3.a['href']}"
+        ),
+        text=div.div.div.text,
+        identifier=identifier,
+        replies=[],
+        repliesLink=getRepliesLink(div, identifier)
+    )
 
 def parseReply(div):
     return dict(
