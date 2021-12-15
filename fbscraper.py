@@ -1,32 +1,20 @@
-"""fbscraper.py - Scraping posts and comments from public Facebook pages
+"""fbscraper.py - Scraping posts, comments and replies from public Facebook pages
 Copyright (c) 2021 Utkarsh Patel
 """
 
-import time
-import numpy as np
-import json
 import pickle as pkl
+from copy import deepcopy
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
-
-BASE_URL = "https://facebook.com"
-W3_BASE_URL = "https://www.facebook.com"
-MOBILE_URL = "https://mobile.facebook.com"
-MBASIC_URL = "https://mbasic.facebook.com"
-
-def delay():
-    """delay for 5-15 seconds"""
-    time.sleep(np.random.randint(5, 15))
-
-class LoginError(Exception):
-    """raised when facebook login is unsuccessful"""
-    pass
-
-class URLError(Exception):
-    """raised when an invalid URL is given to scrape"""
-    pass
+from utils import (delay, parsePageScript, parsePostMetadata, parseReply,
+                   getLinks, getMoreCommentsLink, getMoreRepliesLink,getReplyClass, getReplyDivs)
+from exceptions import (LoginError,
+                        URLError)
+from constants import (BASE_URL,
+                       MOBILE_URL,
+                       MBASIC_URL)
 
 class Session:
     def __init__(self,
@@ -41,9 +29,15 @@ class Session:
         self._credentials = credentials
         self._kwargs = dict()
         option = webdriver.ChromeOptions()
-        option.add_argument('--headless')
-        option.add_argument('--no-sandbox')
-        option.add_argument('--disable-dev-shm-usage')
+        option.add_argument("--headless")
+        option.add_argument("--no-sandbox")
+        option.add_argument("--disable-dev-shm-usage")
+        option.add_argument("--disable-gpu")
+        option.add_argument("--disable-crash-reporter")
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-in-process-stack-traces")
+        option.add_argument("--disable-logging")
+        option.add_argument("--log-level=3")
         self._browser = webdriver.Chrome(executable_path=chromeDriverPath, options=option)
         self._login()
 
@@ -83,7 +77,7 @@ class Session:
         -----------------------------------------------------
         Input:
         :param pageID: unique ID of the page
-        :param nScrolls: number of scrolls required
+        :param nScrolls: number of scrolls required to extract the posts
 
         Output:
         returns a list containing the URLs
@@ -92,109 +86,107 @@ class Session:
         self._browser.get(pageURL)
         self._scroll(nScrolls)
         soup = bs(self._browser.page_source, "html.parser")
-        linkElements = soup.findAll("a")
-        rawLinks = list()
-        for i in range(len(linkElements)):
-            try:
-                link = linkElements[i]["href"]
-                rawLinks.append(link)
-            except:
-                pass
-        linkFilter = """/story.php?"""
-        filteredLinks = list()
-        for link in rawLinks:
-            if link.startswith(linkFilter):
-                filteredLinks.append(link)
+        links = getLinks(soup, filter="""/story.php?""")
         postURLs = list()
-        for i in range(len(filteredLinks) // 4):
-            postURLs.append(f"{MBASIC_URL}{filteredLinks[4 * i + 1]}")
+        for i in range(len(links) // 4):
+            postURLs.append(f"{MBASIC_URL}{links[4 * i + 1]}")
         return postURLs
 
-    def _parsePage(self):
-        """routine to parse the page metadata and return it as a dictionary"""
-        soup = bs(self._browser.page_source, "lxml")
-        metadata = str(soup.find("script"))
-        idx = 0
-        while metadata[idx] != "{":
-            idx += 1
-        metadata = metadata[idx:-9]
-        return json.loads(metadata)
-
-    def _parsePost(self,
-                   metadata):
-        """routine to parse metadata of a given post from the metadata dictionary
-        -------------------------------------------------------------------------
-        Input:
-        :param metadata: dictionary as returned by self._parsePage() method
-        """
-        self._kwargs["post"]["time"] = metadata["dateCreated"]
-        self._kwargs["post"]["text"] = metadata["articleBody"]
-        self._kwargs["post"]["url"] = metadata["url"]
-        stats = dict()
-        stats["likeCount"] = metadata["interactionStatistic"][1]["userInteractionCount"]
-        stats["commentCount"] = metadata["interactionStatistic"][0]["userInteractionCount"]
-        stats["shareCount"] = metadata["interactionStatistic"][2]["userInteractionCount"]
-        self._kwargs["post"]["userInteractionCount"] = stats
-        self._kwargs["post"]["author"] = metadata["author"]
-        self._kwargs["post"]["comments"] = list()
-        self._kwargs["post"]["commentCount"] = metadata["commentCount"]
-        self._kwargs["post"]["identifier"] = metadata["identifier"]
-
-    def _getNext(self):
-        """routine to extract the link to more comments"""
-        soup = bs(self._browser.page_source, "lxml")
-        element = soup.find("div", id=f"see_next_{self.posts[-1]['identifier'].split(';')[1]}")
-        nextLink = None
-        if element is not None:
-            nextLink = f"{MBASIC_URL}{element.a['href']}"
-        return nextLink
-
-    def _extract(self,
-                 postURL):
-        """routine to iteratively extract post comments
+    def _getComments(self,
+                     postURL):
+        """routine to extract post comments recursively
         -----------------------------------------------
         Input:
         :param postURL: URL of the post
         """
         self._browser.get(postURL)
         delay()
-        metadata = self._parsePage()
+        soup = bs(self._browser.page_source, "lxml")
+        metadata = parsePageScript(soup)
         nCommentsRequired = self._kwargs["nComments"] - len(self._kwargs["post"]["comments"])
         nCommentsRequired = min(nCommentsRequired, len(metadata["comment"]))
-        self._kwargs["post"]["comments"].extend(metadata["comment"][:nCommentsRequired])
+        batch = metadata["comment"][:nCommentsRequired]
+        for comment in batch:
+            element = soup.find("div", id=f"comment_replies_more_1:{comment['identifier']}")
+            repliesLink = None
+            if element is not None:
+                repliesLink = f"{MBASIC_URL}{element.a['href']}"
+            comment["repliesLink"] = repliesLink
+        self._kwargs["post"]["comments"].extend(batch)
         self._kwargs["pbar"].update(nCommentsRequired)
         if self._kwargs["nComments"] == len(self._kwargs["post"]["comments"]):
             return
-        nextLink = self._getNext()
+        nextLink = getMoreCommentsLink(soup, self._kwargs["post"]["identifier"])
         if nextLink is not None:
-            self._extract(nextLink)
-        
+            self._getComments(nextLink)
+
+    def _getReplies(self,
+                    url):
+        """routine to extract reples to the comments recursively
+        --------------------------------------------------------
+        Input:
+        :param url: URL of the replies
+        """
+        self._browser.get(url)
+        delay()
+        soup = bs(self._browser.page_source, "lxml")
+        replyClass = getReplyClass(soup)
+        divs = getReplyDivs(soup.findAll("div", class_=replyClass))
+        batch = list()
+        for div in divs:
+            try:
+                reply = parseReply(div)
+                batch.append(reply)
+            except:
+                pass
+        nRepliesRequired = self._kwargs["nReplies"] - len(self._kwargs["current"])
+        nRepliesRequired = min(nRepliesRequired, len(batch))
+        if nRepliesRequired == 0:
+            return
+        self._kwargs["current"].extend(batch[:nRepliesRequired])
+        nextLink = getMoreRepliesLink(soup, self._kwargs["commentID"])
+        if nextLink is not None:
+            self._getReplies(nextLink)
+
     def getPost(self,
                 postURL,
                 dumpAs,
-                nComments=10**10):
+                nComments=10**10,
+                getReplies=False,
+                nReplies=10**10):
         """routine to scrape a post
         ---------------------------
         Input:
         :param postURL: URL of the post
         :param dumpAs: pickled file to dump to
-        :param nComments: upper bound on number of comments
+        :param nComments: upper bound on number of comment to a post
+        :param getReplies: if True, replies to comments will also be scraped
+        :param nReplies: upper bound on number of replies to a comment
         """
         if not postURL.startswith(MBASIC_URL):
             raise URLError(f"Post URL must start with {MBASIC_URL}")
         self._kwargs["nComments"] = nComments
         self._browser.get(postURL)
         delay()
-        metadata = self._parsePage()
-        self._kwargs["post"] = dict()
-        self._parsePost(metadata)
+        soup = bs(self._browser.page_source, "lxml")
+        metadata = parsePageScript(soup)
+        self._kwargs["post"] = parsePostMetadata(metadata)
         self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
         with tqdm(total=self._kwargs["nComments"], desc="Comments") as self._kwargs["pbar"]:
-            self._extract(postURL)
+            self._getComments(postURL)
+        if getReplies:
+            self._kwargs["nReplies"] = nReplies
+            for comment in tqdm(self._kwargs["post"]["comments"], desc="Replies"):
+                try:
+                    self._kwargs["current"] = list()
+                    self._kwargs["commentID"] = comment["identifier"]
+                    self._getReplies(comment["repliesLink"])
+                    comment["replies"] = deepcopy(self._kwargs["current"])
+                except:
+                    comment["replies"] = []
         with open(dumpAs, "ab") as f:
             pkl.dump(self._kwargs["post"], f)
 
     def close(self):
         """Routine to close the session"""
         self._browser.close()
- 
