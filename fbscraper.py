@@ -8,8 +8,8 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
-from utils import (delay, parsePageScript, parsePostMetadata, parseReply,
-                   getLinks, getMoreCommentsLink, getMoreRepliesLink,getReplyClass, getReplyDivs)
+from utils import (delay, parsePageScript, parsePostMetadata, parseComment, parseReply,
+                   getLinks, getMoreCommentsLink, getMoreRepliesLink, getDivClass, getFilteredDivs)
 from exceptions import (LoginError,
                         URLError)
 from constants import (BASE_URL,
@@ -102,21 +102,19 @@ class Session:
         self._browser.get(postURL)
         delay()
         soup = bs(self._browser.page_source, "lxml")
-        metadata = parsePageScript(soup)
+        commentClass = getDivClass(soup)
+        divs = getFilteredDivs(soup.findAll("div", class_=commentClass))
+        batch = list()
+        for div in divs:
+            comment = parseComment(div, self._kwargs["postID"])
+            batch.append(comment)
         nCommentsRequired = self._kwargs["nComments"] - len(self._kwargs["post"]["comments"])
-        nCommentsRequired = min(nCommentsRequired, len(metadata["comment"]))
-        batch = metadata["comment"][:nCommentsRequired]
-        for comment in batch:
-            element = soup.find("div", id=f"comment_replies_more_1:{comment['identifier']}")
-            repliesLink = None
-            if element is not None:
-                repliesLink = f"{MBASIC_URL}{element.a['href']}"
-            comment["repliesLink"] = repliesLink
-        self._kwargs["post"]["comments"].extend(batch)
-        self._kwargs["pbar"].update(nCommentsRequired)
-        if self._kwargs["nComments"] == len(self._kwargs["post"]["comments"]):
+        nCommentsRequired = min(nCommentsRequired, len(batch))
+        if nCommentsRequired == 0:
             return
-        nextLink = getMoreCommentsLink(soup, self._kwargs["post"]["identifier"])
+        self._kwargs["post"]["comments"].extend(batch[:nCommentsRequired])
+        self._kwargs["pbar"].update(nCommentsRequired)
+        nextLink = getMoreCommentsLink(soup, self._kwargs["postID"])
         if nextLink is not None:
             self._getComments(nextLink)
 
@@ -130,15 +128,12 @@ class Session:
         self._browser.get(url)
         delay()
         soup = bs(self._browser.page_source, "lxml")
-        replyClass = getReplyClass(soup)
-        divs = getReplyDivs(soup.findAll("div", class_=replyClass))
+        replyClass = getDivClass(soup)
+        divs = getFilteredDivs(soup.findAll("div", class_=replyClass))
         batch = list()
         for div in divs:
-            try:
-                reply = parseReply(div)
-                batch.append(reply)
-            except:
-                pass
+            reply = parseReply(div)
+            batch.append(reply)
         nRepliesRequired = self._kwargs["nReplies"] - len(self._kwargs["current"])
         nRepliesRequired = min(nRepliesRequired, len(batch))
         if nRepliesRequired == 0:
@@ -171,6 +166,7 @@ class Session:
         soup = bs(self._browser.page_source, "lxml")
         metadata = parsePageScript(soup)
         self._kwargs["post"] = parsePostMetadata(metadata)
+        self._kwargs["postID"] = self._kwargs["post"]["identifier"].split(";")[1]
         self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
         with tqdm(total=self._kwargs["nComments"], desc="Comments") as self._kwargs["pbar"]:
             self._getComments(postURL)
