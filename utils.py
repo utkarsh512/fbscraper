@@ -120,7 +120,7 @@ def parsePostMetadata(metadata):
         url=metadata["url"],
         likeCount=metadata["interactionStatistic"][1]["userInteractionCount"],
         commentCount=metadata["commentCount"],
-        sharCount=metadata["interactionStatistic"][2]["userInteractionCount"],
+        shareCount=metadata["interactionStatistic"][2]["userInteractionCount"],
         author=metadata["author"],
         identifier=metadata["identifier"],
         comments=[]
