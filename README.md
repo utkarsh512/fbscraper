@@ -8,11 +8,11 @@ Scraping posts, comments and replies from Facebook using selenium and beautifuls
 ### Command line style
 fbscraper can be executed in command line as
 ```bash
-$ python main.py -e EMAIL -p PASSWORD -x chromeDriverPath -i DonaldTrump -s 100 -d posts.pkl -g true [-c 1000] [-r 1000] [-j false]
+$ python cli.py -e EMAIL -p PASSWORD -x chromeDriverPath -i DonaldTrump -s 100 -d posts.pkl -g true [-c 1000] [-r 1000] [-j false]
 ```
 For more information on the flags, run
 ```bash
-$ python main.py --help
+$ python cli.py --help
 ```
 ### Notebook style
 First of all, create a `Session` object for scraping:
