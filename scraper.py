@@ -12,10 +12,12 @@ from utils import (delay, parsePageScript, parsePostMetadata, parseComment, pars
                    getLinks, getMoreCommentsLink, getMoreRepliesLink, getDivClass, getFilteredDivs)
 from exceptions import (LoginError,
                         URLError,
-                        BadPostError)
+                        BadPostError,
+                        SourceError)
 from constants import (BASE_URL,
                        MOBILE_URL,
-                       MBASIC_URL)
+                       MBASIC_URL,
+                       ISSUE_URL)
 
 class Session:
     def __init__(self,
@@ -57,10 +59,13 @@ class Session:
             self._browser.find_element(By.NAME, "email").send_keys(self._credentials[0])
             self._browser.find_element(By.NAME, "pass").send_keys(self._credentials[1])
             self._browser.find_element(By.NAME, "login").click()
-            print("Successfully logged in!")
             delay()
+            soup = bs(self._browser.page_source, "lxml")
+            title = soup.find("title").text
+            if title != "Facebook":
+                raise LoginError("Login unsuccessful! Please check the credentials.")
         except:
-            raise LoginError("Login unsuccessful")
+            raise SourceError(f"Login page decoding is outdated!\nPlease create an issue at {ISSUE_URL}")
 
     def _scroll(self,
                 nScrolls):
