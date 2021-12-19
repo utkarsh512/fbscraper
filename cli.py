@@ -1,10 +1,10 @@
-"""main.py - Scraping Facebook Data
+"""cli.py - Command line interface for fbscraper
 Author: Utkarsh Patel
 
 Run this file as
-$ python main.py -e EMAIL -p PASSWORD -x chromeDriverPath -i DonaldTrump -s 100 -d posts.pkl -g true
-                 [-c 1000] [-r 1000] [-j false]
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$ python cli.py -e EMAIL -p PASSWORD -x chromeDriverPath -i DonaldTrump -s 100 -d posts.pkl -g true
+                [-c 1000] [-r 1000] [-j false]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                       optional arguments
 """
 
