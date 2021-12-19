@@ -13,7 +13,8 @@ from utils import (delay, parsePageScript, parsePostMetadata, parseComment, pars
 from exceptions import (LoginError,
                         URLError,
                         BadPostError,
-                        SourceError)
+                        SourceError,
+                        NoSuchElementException)
 from constants import (BASE_URL,
                        MOBILE_URL,
                        MBASIC_URL,
@@ -64,7 +65,7 @@ class Session:
             title = soup.find("title").text
             if title != "Facebook":
                 raise LoginError("Login unsuccessful! Please check the credentials.")
-        except:
+        except NoSuchElementException:
             raise SourceError(f"Login page decoding is outdated!\nPlease create an issue at {ISSUE_URL}")
 
     def _scroll(self,
