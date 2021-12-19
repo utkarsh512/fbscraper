@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup as bs
 from utils import (delay, parsePageScript, parsePostMetadata, parseComment, parseReply,
                    getLinks, getMoreCommentsLink, getMoreRepliesLink, getDivClass, getFilteredDivs)
 from exceptions import (LoginError,
-                        URLError)
+                        URLError,
+                        BadPostError)
 from constants import (BASE_URL,
                        MOBILE_URL,
                        MBASIC_URL)
@@ -170,7 +171,10 @@ class Session:
         self._browser.get(postURL)
         delay()
         soup = bs(self._browser.page_source, "lxml")
-        metadata = parsePageScript(soup)
+        try:
+            metadata = parsePageScript(soup)
+        except:
+            raise BadPostError("Page source doesn't contain <script> element")
         self._kwargs["post"] = parsePostMetadata(metadata)
         self._kwargs["postID"] = self._kwargs["post"]["identifier"].split(";")[1]
         self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
