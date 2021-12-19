@@ -1,3 +1,7 @@
+"""exceptions.py - Exceptions handling for fbscraper
+Copyright (c) 2021 Utkarsh Patel
+"""
+
 class LoginError(Exception):
     """raised when facebook login is unsuccessful"""
     pass
@@ -8,4 +12,8 @@ class URLError(Exception):
 
 class BadPostError(Exception):
     """raised when the post's metadata cannot be parsed"""
+    pass
+
+class SourceError(Exception):
+    """raised when facebook page source has been updated"""
     pass
