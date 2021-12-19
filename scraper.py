@@ -196,6 +196,6 @@ class Session:
         with open(dumpAs, "ab") as f:
             pkl.dump(self._kwargs["post"], f)
 
-    def close(self):
+    def __del__(self):
         """Routine to close the session"""
         self._browser.close()
