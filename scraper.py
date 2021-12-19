@@ -21,14 +21,14 @@ class Session:
     def __init__(self,
                  credentials,
                  chromeDriverPath="chromedriver"):
-        """Routine to inititialize a session
-        ------------------------------------
+        """object constructor
+        ---------------------
         Input:
         :param credentials: (email, password) tuple for Facebook login
         :param chromeDriverPath: path to chromedriver
         """
         self._credentials = credentials
-        self._kwargs = dict()
+        self._data = dict()
         option = webdriver.ChromeOptions()
         option.add_argument("--headless")
         option.add_argument("--no-sandbox")
@@ -41,6 +41,10 @@ class Session:
         option.add_argument("--log-level=3")
         self._browser = webdriver.Chrome(executable_path=chromeDriverPath, options=option)
         self._login()
+
+    def __del__(self):
+        """object destructor"""
+        self._browser.close()
 
     def _login(self):
         """routine to login to Facebook using passed credentials
@@ -107,15 +111,15 @@ class Session:
         divs = getFilteredDivs(soup.findAll("div", class_=commentClass))
         batch = list()
         for div in divs:
-            comment = parseComment(div, self._kwargs["postID"])
+            comment = parseComment(div, self._data["postID"])
             batch.append(comment)
-        nCommentsRequired = self._kwargs["nComments"] - len(self._kwargs["post"]["comments"])
+        nCommentsRequired = self._data["nComments"] - len(self._data["post"]["comments"])
         nCommentsRequired = min(nCommentsRequired, len(batch))
         if nCommentsRequired == 0:
             return
-        self._kwargs["post"]["comments"].extend(batch[:nCommentsRequired])
-        self._kwargs["pbar"].update(nCommentsRequired)
-        nextLink = getMoreCommentsLink(soup, self._kwargs["postID"])
+        self._data["post"]["comments"].extend(batch[:nCommentsRequired])
+        self._data["progressBar"].update(nCommentsRequired)
+        nextLink = getMoreCommentsLink(soup, self._data["postID"])
         if nextLink is not None:
             try:
                 self._getComments(nextLink)
@@ -138,12 +142,12 @@ class Session:
         for div in divs:
             reply = parseReply(div)
             batch.append(reply)
-        nRepliesRequired = self._kwargs["nReplies"] - len(self._kwargs["current"])
+        nRepliesRequired = self._data["nReplies"] - len(self._data["current"])
         nRepliesRequired = min(nRepliesRequired, len(batch))
         if nRepliesRequired == 0:
             return
-        self._kwargs["current"].extend(batch[:nRepliesRequired])
-        nextLink = getMoreRepliesLink(soup, self._kwargs["commentID"])
+        self._data["current"].extend(batch[:nRepliesRequired])
+        nextLink = getMoreRepliesLink(soup, self._data["commentID"])
         if nextLink is not None:
             try:
                 self._getReplies(nextLink)
@@ -153,8 +157,8 @@ class Session:
     def getPost(self,
                 postURL,
                 dumpAs,
-                nComments=10**10,
                 getReplies=False,
+                nComments=10**10,
                 nReplies=10**10):
         """routine to scrape a post
         ---------------------------
@@ -167,7 +171,7 @@ class Session:
         """
         if not postURL.startswith(MBASIC_URL):
             raise URLError(f"Post URL must start with {MBASIC_URL}")
-        self._kwargs["nComments"] = nComments
+        self._data["nComments"] = nComments
         self._browser.get(postURL)
         delay()
         soup = bs(self._browser.page_source, "lxml")
@@ -175,27 +179,23 @@ class Session:
             metadata = parsePageScript(soup)
         except:
             raise BadPostError("Page source doesn't contain <script> element")
-        self._kwargs["post"] = parsePostMetadata(metadata)
-        self._kwargs["postID"] = self._kwargs["post"]["identifier"].split(";")[1]
-        self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
-        with tqdm(total=self._kwargs["nComments"], desc="Comments") as self._kwargs["pbar"]:
+        self._data["post"] = parsePostMetadata(metadata)
+        self._data["postID"] = self._data["post"]["identifier"].split(";")[1]
+        self._data["nComments"] = min(self._data["nComments"], self._data["post"]["commentCount"])
+        with tqdm(total=self._data["nComments"], desc="Comments") as self._data["progressBar"]:
             try:
                 self._getComments(postURL)
             except:
                 pass
         if getReplies:
-            self._kwargs["nReplies"] = nReplies
-            for comment in tqdm(self._kwargs["post"]["comments"], desc="Replies"):
+            self._data["nReplies"] = nReplies
+            for comment in tqdm(self._data["post"]["comments"], desc="Replies"):
                 try:
-                    self._kwargs["current"] = list()
-                    self._kwargs["commentID"] = comment["identifier"]
+                    self._data["current"] = list()
+                    self._data["commentID"] = comment["identifier"]
                     self._getReplies(comment["repliesLink"])
-                    comment["replies"] = deepcopy(self._kwargs["current"])
+                    comment["replies"] = deepcopy(self._data["current"])
                 except:
                     comment["replies"] = []
         with open(dumpAs, "ab") as f:
-            pkl.dump(self._kwargs["post"], f)
-
-    def __del__(self):
-        """Routine to close the session"""
-        self._browser.close()
+            pkl.dump(self._data["post"], f)
