@@ -2,6 +2,8 @@
 Copyright (c) 2021 Utkarsh Patel
 """
 
+from selenium.common.exceptions import NoSuchElementException
+
 class LoginError(Exception):
     """raised when facebook login is unsuccessful"""
     pass
