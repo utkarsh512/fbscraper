@@ -54,10 +54,6 @@ where
 
 Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
 
-Done with scraping! Remember to close the session as 
-```python3
-sess.close()
-```
 ## Sample Output
 Following data was scraped from The New York's Time (`nytimes`) Facebook page.
 ```json
@@ -68,7 +64,7 @@ Following data was scraped from The New York's Time (`nytimes`) Facebook page.
         "url": "https://www.facebook.com/story.php?story_fbid=10152837809989999&id=5281959998",
         "likeCount": 25,
         "commentCount": 13,
-        "sharCount": 3,
+        "shareCount": 3,
         "author": {
             "@type": "Organization",
             "name": "The New York Times",
