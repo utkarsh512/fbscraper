@@ -116,7 +116,10 @@ class Session:
         self._kwargs["pbar"].update(nCommentsRequired)
         nextLink = getMoreCommentsLink(soup, self._kwargs["postID"])
         if nextLink is not None:
-            self._getComments(nextLink)
+            try:
+                self._getComments(nextLink)
+            except:
+                pass
 
     def _getReplies(self,
                     url):
@@ -141,7 +144,10 @@ class Session:
         self._kwargs["current"].extend(batch[:nRepliesRequired])
         nextLink = getMoreRepliesLink(soup, self._kwargs["commentID"])
         if nextLink is not None:
-            self._getReplies(nextLink)
+            try:
+                self._getReplies(nextLink)
+            except:
+                pass
 
     def getPost(self,
                 postURL,
@@ -169,7 +175,10 @@ class Session:
         self._kwargs["postID"] = self._kwargs["post"]["identifier"].split(";")[1]
         self._kwargs["nComments"] = min(self._kwargs["nComments"], self._kwargs["post"]["commentCount"])
         with tqdm(total=self._kwargs["nComments"], desc="Comments") as self._kwargs["pbar"]:
-            self._getComments(postURL)
+            try:
+                self._getComments(postURL)
+            except:
+                pass
         if getReplies:
             self._kwargs["nReplies"] = nReplies
             for comment in tqdm(self._kwargs["post"]["comments"], desc="Replies"):
