@@ -46,7 +46,6 @@ def main():
             )
         except Exception as e:
             print(f"Error: {e}")
-    sess.close()
     if args.json:
         PKLtoJSON(args.dump, args.dump.replace("pkl", "json"))
 
