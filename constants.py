@@ -9,4 +9,4 @@ W3_BASE_URL = "https://www.facebook.com"
 MOBILE_URL = "https://mobile.facebook.com"
 MBASIC_URL = "https://mbasic.facebook.com"
 ISSUE_URL = "https://github.com/utkarsh512/fbscraper/issues"
-MAX_THREAD = os.cpu_count()
+MAX_THREADS = os.cpu_count()
