@@ -16,11 +16,9 @@ cssutils.log.setLevel(logging.CRITICAL)
 
 CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
-def delay(secs=None):
+def delay():
     """randomized delay"""
-    if secs is None:
-      secs = min(abs(np.random.randn()), 5) + 1
-    time.sleep(secs)
+    time.sleep(np.random.randint(5, 10))
 
 def PKLtoJSON(old, new):
     """routine to convert the pickled dataset (as used in scraper) to JSON
