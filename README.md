@@ -33,7 +33,7 @@ postURLs = sess.getPostURLs(
     nScrolls=10
 )
 ```
-where `pageID` is the unique Facebook ID of the page and `nScrolls` is number of scrolls (as viewed in FB mobile app) upto which posts are to be extracted. The above function will return a list of URLs `postURLs`. To scrape every post URL of a given page, use infinite scrolling via `nScrolls=-1`.
+where `pageID` is the unique Facebook ID of the page and `nScrolls` is number of scrolls (as viewed in FB mobile app) upto which posts are to be extracted. The above function will return a list of URLs `postURLs`. 
 
 As you now have the list of URLs for the required posts, post data (including comments) can be scraped as
 ```python3
