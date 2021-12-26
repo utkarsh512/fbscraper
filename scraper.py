@@ -60,7 +60,8 @@ class Session:
             self._browser.find_element(By.NAME, "email").send_keys(self._credentials[0])
             self._browser.find_element(By.NAME, "pass").send_keys(self._credentials[1])
             self._browser.find_element(By.NAME, "login").click()
-            delay(10)
+            delay()
+            delay()
             soup = bs(self._browser.page_source, "lxml")
             title = soup.find("title").text
             if title != "Facebook":
@@ -75,11 +76,35 @@ class Session:
         Input:
         nScrolls: number of times to scroll
         """
-        for i in tqdm(range(nScrolls), desc="Scrolling"):
-            self._browser.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return "
-                "lenOfPage;")
+        if nScrolls == -1:
+            # infinite scroll
+            lenOfPage = self._browser.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
+            )
             delay()
+            match = False
+            scrollCount = 0
+            while not match:
+                lastCount = lenOfPage
+                scrollCount += 1
+                try:
+                    lenOfPage = self._browser.execute_script(
+                        "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
+                    )
+                except:
+                    print("Exiting scrolling")
+                    return
+                delay()
+                if scrollCount % 10 == 0:
+                    print(f"{scrollCount} scrolls")
+                if lastCount == lenOfPage:
+                    match = True
+        else:
+            for i in tqdm(range(nScrolls), desc="Scrolling"):
+                self._browser.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return "
+                    "lenOfPage;")
+                delay()
 
     def getPostURLs(self,
                     pageID,
