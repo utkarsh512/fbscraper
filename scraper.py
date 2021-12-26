@@ -76,8 +76,11 @@ class Session:
         nScrolls: number of times to scroll
         """
         for i in tqdm(range(nScrolls), desc="Scrolling"):
-            self._browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            delay()
+            try:
+                self._browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                delay()
+            except:
+                print("Scrolling stopped due to exceptions.")
 
     def getPostURLs(self,
                     pageID,
