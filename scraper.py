@@ -60,7 +60,7 @@ class Session:
             self._browser.find_element(By.NAME, "email").send_keys(self._credentials[0])
             self._browser.find_element(By.NAME, "pass").send_keys(self._credentials[1])
             self._browser.find_element(By.NAME, "login").click()
-            delay()
+            delay(10)
             soup = bs(self._browser.page_source, "lxml")
             title = soup.find("title").text
             if title != "Facebook":
