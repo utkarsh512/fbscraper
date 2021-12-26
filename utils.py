@@ -16,9 +16,10 @@ cssutils.log.setLevel(logging.CRITICAL)
 
 CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
-def delay():
+def delay(secs=None):
     """randomized delay"""
-    secs = min(np.random.randn(), 5) + 1
+    if secs is None:
+      secs = min(abs(np.random.randn()), 5) + 1
     time.sleep(secs)
 
 def PKLtoJSON(old, new):
