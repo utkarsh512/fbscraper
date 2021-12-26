@@ -61,10 +61,9 @@ class Session:
             self._browser.find_element(By.NAME, "pass").send_keys(self._credentials[1])
             self._browser.find_element(By.NAME, "login").click()
             delay()
-            delay()
             soup = bs(self._browser.page_source, "lxml")
-            title = soup.find("title").text
-            if title != "Facebook":
+            title = soup.find("title").text.lower().split()
+            if "log" in title:
                 raise LoginError("Login unsuccessful! Please check the credentials.")
         except NoSuchElementException:
             raise SourceError(f"Login page decoding is outdated!\nPlease create an issue at {ISSUE_URL}")
@@ -76,35 +75,9 @@ class Session:
         Input:
         nScrolls: number of times to scroll
         """
-        if nScrolls == -1:
-            # infinite scroll
-            lenOfPage = self._browser.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
-            )
+        for i in tqdm(range(nScrolls), desc="Scrolling"):
+            self._browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             delay()
-            match = False
-            scrollCount = 0
-            while not match:
-                lastCount = lenOfPage
-                scrollCount += 1
-                try:
-                    lenOfPage = self._browser.execute_script(
-                        "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return lenOfPage;"
-                    )
-                except:
-                    print("Exiting scrolling")
-                    return
-                delay()
-                if scrollCount % 10 == 0:
-                    print(f"{scrollCount} scrolls")
-                if lastCount == lenOfPage:
-                    match = True
-        else:
-            for i in tqdm(range(nScrolls), desc="Scrolling"):
-                self._browser.execute_script(
-                    "window.scrollTo(0, document.body.scrollHeight);var lenOfPage=document.body.scrollHeight;return "
-                    "lenOfPage;")
-                delay()
 
     def getPostURLs(self,
                     pageID,
