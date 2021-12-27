@@ -28,12 +28,10 @@ where `(EMAIL, PASSWORD)` are your facebook credentials and `chromeDriverPath` i
 
 Then, you can extract recent post URLs of a public pages as
 ```python3
-postURLs = sess.getPostURLs(
-    pageID="nytimes", 
-    nScrolls=10
-)
+sess.getPage("nytimes")
+sess.scroll(10)
+postURLs = sess.getPostURLs()
 ```
-where `pageID` is the unique Facebook ID of the page and `nScrolls` is number of scrolls (as viewed in FB mobile app) upto which posts are to be extracted. The above function will return a list of URLs `postURLs`. 
 
 As you now have the list of URLs for the required posts, post data (including comments) can be scraped as
 ```python3
