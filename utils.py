@@ -1,10 +1,11 @@
-"""utils.py - Getters and parsers for fbscraper
+"""utils.py - Parsing HTML and CSS for fbscraper
 Copyright (c) 2021 Utkarsh Patel
 """
 
 import re
 import time
 import numpy as np
+from tqdm import tqdm
 import json
 import cssutils
 import pickle as pkl
@@ -18,10 +19,10 @@ CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
 def delay():
     """randomized delay"""
-    # minimum delay of 5 secs required for stability
-    time.sleep(np.random.randint(5, 10)) 
+    time.sleep(np.random.randint(5, 10))
 
-def PKLtoJSON(old, new):
+def PKLtoJSON(old,
+              new):
     """routine to convert the pickled dataset (as used in scraper) to JSON
     ---------------------------------------------------------------------
     Input:
@@ -38,11 +39,12 @@ def PKLtoJSON(old, new):
     with open(new, "w", encoding="utf-8") as writer:
         writer.write(json.dumps(posts, indent=4))
 
-def getLinks(soup, filter=None):
+def getLinks(soup,
+             filter=None):
     """routine to extract all hyperlinks from the given soup element with filtering"""
     linkElements = soup.findAll("a")
     rawLinks = list()
-    for i in range(len(linkElements)):
+    for i in tqdm(range(len(linkElements)), desc='Extracting links'):
         try:
             link = linkElements[i]["href"]
             rawLinks.append(link)
@@ -51,12 +53,13 @@ def getLinks(soup, filter=None):
     if filter is None:
         return rawLinks
     filteredLinks = list()
-    for link in rawLinks:
+    for link in tqdm(rawLinks, desc='Filtering'):
         if link.startswith(filter):
             filteredLinks.append(link)
     return filteredLinks
 
-def getMoreCommentsLink(soup, postID):
+def getMoreCommentsLink(soup,
+                        postID):
     """routine to extract the 'more comments' link in the page
     returns None if it doesn't exists"""
     element = soup.find("div", id=f"see_next_{postID}")
@@ -65,7 +68,8 @@ def getMoreCommentsLink(soup, postID):
         nextLink = f"{MBASIC_URL}{element.a['href']}"
     return nextLink
 
-def getMoreRepliesLink(soup, commentID):
+def getMoreRepliesLink(soup,
+                       commentID):
     """routine to extract the 'more replies' link in the page
     return None if it doesn't exists"""
     element = soup.find("div", id=f"comment_replies_more_1:{commentID}")
@@ -92,7 +96,8 @@ def getFilteredDivs(divs):
             filtered.append(div)
     return filtered
 
-def getRepliesLink(div, divID):
+def getRepliesLink(div,
+                   divID):
     """routine to get reply link a comment"""
     element = div.find("div", id=f"comment_replies_more_1:{divID}")
     repliesLink = None
@@ -139,7 +144,13 @@ def parseCSS(css):
             pass
     return dct
 
-def parseComment(div, postID):
+def parseComment(div,
+                 postID):
+    """routine to parse a comment div
+    ---------------------------------
+    :param div: comment div
+    :param postID: ID of the post of which div is a part
+    """
     identifier = f"{postID}_{div.get('id')}"
     return dict(
         author=dict(
@@ -153,6 +164,10 @@ def parseComment(div, postID):
     )
 
 def parseReply(div):
+    """routine to parse a reply div
+    -------------------------------
+    :param div: reply div
+    """
     return dict(
         author=dict(
             name=re.sub(CLEANR, "", div.div.h3.text),
