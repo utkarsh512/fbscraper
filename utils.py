@@ -18,7 +18,8 @@ CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
 def delay():
     """randomized delay"""
-    time.sleep(np.random.randint(1, 5))
+    # minimum delay of 5 secs required for stability
+    time.sleep(np.random.randint(5, 10)) 
 
 def PKLtoJSON(old, new):
     """routine to convert the pickled dataset (as used in scraper) to JSON
