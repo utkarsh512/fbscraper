@@ -33,7 +33,7 @@ class Session:
         self._credentials = credentials
         self._data = dict()
         option = webdriver.ChromeOptions()
-        option.add_argument("--headless")
+        # option.add_argument("--headless")
         option.add_argument("--no-sandbox")
         option.add_argument("--disable-dev-shm-usage")
         option.add_argument("--disable-gpu")
@@ -68,8 +68,17 @@ class Session:
         except NoSuchElementException:
             raise SourceError(f"Login page decoding is outdated!\nPlease create an issue at {ISSUE_URL}")
 
-    def _scroll(self,
-                nScrolls):
+    def getPage(self,
+                pageID):
+        """routine to open a Facebook page
+        ----------------------------------
+        :param pageID: Facebook id of the page
+        """
+        pageURL = f"{MOBILE_URL}/{pageID}"
+        self._browser.get(pageURL)
+
+    def scroll(self,
+               nScrolls):
         """routine to scroll through the Facebook page
         ----------------------------------------------
         Input:
@@ -82,21 +91,12 @@ class Session:
         except Exception as e:
             print(f"Scrolling stopped! {e}")
 
-    def getPostURLs(self,
-                    pageID,
-                    nScrolls):
+    def getPostURLs(self):
         """routine to extract the post urls from a given page
         -----------------------------------------------------
-        Input:
-        :param pageID: unique ID of the page
-        :param nScrolls: number of scrolls required to extract the posts
-
         Output:
         returns a list containing the URLs
         """
-        pageURL = f"{MOBILE_URL}/{pageID}"
-        self._browser.get(pageURL)
-        self._scroll(nScrolls)
         soup = bs(self._browser.page_source, "html.parser")
         links = getLinks(soup, filter="""/story.php?""")
         postURLs = list()
