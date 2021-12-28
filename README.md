@@ -27,7 +27,7 @@ As you now have the list of URLs for the required posts, post data (including co
 ```python3
 sess.getPost(
     postURL="https://mbasic.facebook.com/story.php?...",
-    dumpAs="posts.pkl",
+    dump="posts.pkl",
     getComments=True,
     getReplies=True,
     nComments=1000,
