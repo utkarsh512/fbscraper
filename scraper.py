@@ -82,7 +82,7 @@ class Session:
         """routine to scroll through the Facebook page
         ----------------------------------------------
         Input:
-        nScrolls: number of times to scroll
+        :param nScrolls: number of times to scroll
         """
         try:
             for i in tqdm(range(nScrolls), desc="Scrolling"):
