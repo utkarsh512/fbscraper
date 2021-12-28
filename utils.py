@@ -1,10 +1,11 @@
-"""utils.py - Parsing HTML and CSS for fbscraper
+"""utils.py - Getters and parsers for fbscraper
 Copyright (c) 2021 Utkarsh Patel
 """
 
 import re
 import time
 import numpy as np
+import urllib.parse
 from tqdm import tqdm
 import json
 import cssutils
@@ -60,7 +61,7 @@ def getLinks(soup,
 
 def getMoreCommentsLink(soup,
                         postID):
-    """routine to extract the `more comments` link in the page
+    """routine to extract the 'more comments' link in the page
     returns None if it doesn't exists"""
     element = soup.find("div", id=f"see_next_{postID}")
     nextLink = None
@@ -70,7 +71,7 @@ def getMoreCommentsLink(soup,
 
 def getMoreRepliesLink(soup,
                        commentID):
-    """routine to extract the `more replies` link in the page
+    """routine to extract the 'more replies' link in the page
     return None if it doesn't exists"""
     element = soup.find("div", id=f"comment_replies_more_1:{commentID}")
     nextLink = None
@@ -108,8 +109,19 @@ def getRepliesLink(div,
             pass
     return repliesLink
 
+def parseLinks(links):
+    """routine to extract unique post URLs"""
+    postURLsDict = dict()
+    for link in tqdm(links, desc="Parsing links"):
+        params = urllib.parse.parse_qs(link[11:]) # removing /story.php?
+        postURLsDict[(params["story_fbid"][0], params["id"][0])] = True
+    postURLs = list()
+    for key in tqdm(postURLsDict.keys(), desc="Preparing links"):
+        postURLs.append(f"{MBASIC_URL}/story.php?story_fbid={key[0]}&id={key[1]}")
+    return postURLs
+
 def parsePageScript(soup):
-    """routine to parse content of `script` tag"""
+    """routine to parse content of <script> tag"""
     metadata = str(soup.find("script"))
     idx = 0
     while metadata[idx] != "{":
