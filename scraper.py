@@ -8,7 +8,7 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
-from utils import (delay, parsePageScript, parsePostMetadata, parseComment, parseReply,
+from utils import (delay, parseLinks, parsePageScript, parsePostMetadata, parseComment, parseReply,
                    getLinks, getMoreCommentsLink, getMoreRepliesLink, getDivClass, getFilteredDivs)
 from exceptions import (LoginError,
                         URLError,
@@ -28,7 +28,7 @@ class Session:
         ---------------------
         Input:
         :param credentials: (email, password) tuple for Facebook login
-        :param chromeDriverPath: path to `chromedriver`
+        :param chromeDriverPath: path to chromedriver
         """
         self._credentials = credentials
         self._data = dict()
@@ -52,7 +52,7 @@ class Session:
     def _login(self):
         """routine to login to Facebook using passed credentials
         --------------------------------------------------------
-        raises `LoginError` in case login is unsuccessful
+        raises LoginError in case login is unsuccessful
         """
         try:
             self._browser.get(BASE_URL)
@@ -98,8 +98,8 @@ class Session:
         returns a list containing the URLs
         """
         soup = bs(self._browser.page_source, "html.parser")
-        # TO DO, extract fbid and id from urls for removing duplicates
-        return getLinks(soup, filter="""/story.php?""")
+        links = getLinks(soup, filter="""/story.php?""")
+        return parseLinks(links)
 
     def _getComments(self,
                      postURL):
