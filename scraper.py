@@ -163,7 +163,8 @@ class Session:
 
     def getPost(self,
                 postURL,
-                dumpAs,
+                dump,
+                getComments=False,
                 getReplies=False,
                 nComments=10**10,
                 nReplies=10**10):
@@ -171,9 +172,10 @@ class Session:
         ---------------------------
         Input:
         :param postURL: URL of the post
-        :param dumpAs: pickled file to dump to
-        :param nComments: upper bound on number of comment to a post
+        :param dump: pickled file to dump to
+        :param getComments: if True, comments will also be scraped
         :param getReplies: if True, replies to comments will also be scraped
+        :param nComments: upper bound on number of comment to a post
         :param nReplies: upper bound on number of replies to a comment
         """
         if not postURL.startswith(MBASIC_URL):
@@ -187,13 +189,14 @@ class Session:
         except:
             raise BadPostError("Page source doesn't contain <script> element")
         self._data["post"] = parsePostMetadata(metadata)
-        self._data["postID"] = self._data["post"]["identifier"].split(";")[1]
-        self._data["nComments"] = min(self._data["nComments"], self._data["post"]["commentCount"])
-        with tqdm(total=self._data["nComments"], desc="Comments") as self._data["progressBar"]:
-            try:
-                self._getComments(postURL)
-            except:
-                pass
+        if getComments:
+            self._data["postID"] = self._data["post"]["identifier"].split(";")[1]
+            self._data["nComments"] = min(self._data["nComments"], self._data["post"]["commentCount"])
+            with tqdm(total=self._data["nComments"], desc="Comments") as self._data["progressBar"]:
+                try:
+                    self._getComments(postURL)
+                except:
+                    pass
         if getReplies:
             self._data["nReplies"] = nReplies
             for comment in tqdm(self._data["post"]["comments"], desc="Replies"):
@@ -204,5 +207,5 @@ class Session:
                     comment["replies"] = deepcopy(self._data["current"])
                 except:
                     comment["replies"] = []
-        with open(dumpAs, "ab") as f:
+        with open(dump, "ab") as f:
             pkl.dump(self._data["post"], f)
