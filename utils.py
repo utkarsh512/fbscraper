@@ -60,7 +60,7 @@ def getLinks(soup,
 
 def getMoreCommentsLink(soup,
                         postID):
-    """routine to extract the 'more comments' link in the page
+    """routine to extract the `more comments` link in the page
     returns None if it doesn't exists"""
     element = soup.find("div", id=f"see_next_{postID}")
     nextLink = None
@@ -70,7 +70,7 @@ def getMoreCommentsLink(soup,
 
 def getMoreRepliesLink(soup,
                        commentID):
-    """routine to extract the 'more replies' link in the page
+    """routine to extract the `more replies` link in the page
     return None if it doesn't exists"""
     element = soup.find("div", id=f"comment_replies_more_1:{commentID}")
     nextLink = None
@@ -109,7 +109,7 @@ def getRepliesLink(div,
     return repliesLink
 
 def parsePageScript(soup):
-    """routine to parse content of <script> tag"""
+    """routine to parse content of `script` tag"""
     metadata = str(soup.find("script"))
     idx = 0
     while metadata[idx] != "{":
