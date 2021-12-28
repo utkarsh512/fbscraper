@@ -28,7 +28,7 @@ class Session:
         ---------------------
         Input:
         :param credentials: (email, password) tuple for Facebook login
-        :param chromeDriverPath: path to chromedriver
+        :param chromeDriverPath: path to `chromedriver`
         """
         self._credentials = credentials
         self._data = dict()
@@ -52,7 +52,7 @@ class Session:
     def _login(self):
         """routine to login to Facebook using passed credentials
         --------------------------------------------------------
-        raises LoginError in case login is unsuccessful
+        raises `LoginError` in case login is unsuccessful
         """
         try:
             self._browser.get(BASE_URL)
@@ -98,11 +98,8 @@ class Session:
         returns a list containing the URLs
         """
         soup = bs(self._browser.page_source, "html.parser")
-        links = getLinks(soup, filter="""/story.php?""")
-        postURLs = list()
-        for i in range(len(links) // 4):
-            postURLs.append(f"{MBASIC_URL}{links[4 * i + 1]}")
-        return postURLs
+        # TO DO, extract fbid and id from urls for removing duplicates
+        return getLinks(soup, filter="""/story.php?""")
 
     def _getComments(self,
                      postURL):
