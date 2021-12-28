@@ -28,8 +28,9 @@ As you now have the list of URLs for the required posts, post data (including co
 sess.getPost(
     postURL="https://mbasic.facebook.com/story.php?...",
     dumpAs="posts.pkl",
-    nComments=1000,
+    getComments=True,
     getReplies=True,
+    nComments=1000,
     nReplies=10
 )
 ```
