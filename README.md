@@ -36,7 +36,7 @@ sess.getPost(
 ```
 where 
 * `postURL` is the URL of the post
-* `dumpAs` is the name of binary file used for appending the post
+* `dump` is the name of binary file used for appending the post
 * `nComments` is the upper-bound on number of comments per post
 * `getReplies` should be `True` if you want to scrape replies as well
 * `nReplies` is the upper-bound on number of replies per comment
