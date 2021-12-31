@@ -1,9 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-setup.cfg
-src/fbtext.egg-info/PKG-INFO
-src/fbtext.egg-info/SOURCES.txt
-src/fbtext.egg-info/dependency_links.txt
-src/fbtext.egg-info/requires.txt
-src/fbtext.egg-info/top_level.txt
