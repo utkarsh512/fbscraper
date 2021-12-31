@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: fbtext
+Version: 1.0.0
+Summary: Scraping textual data from Facebook for NLP research
+Home-page: https://github.com/utkarsh512/fbtext
+Author: Utkarsh Patel
+Author-email: imutkarshpatel@gmail.com
+License: UNKNOWN
+Project-URL: Bug Tracker, https://github.com/utkarsh512/fbtext/issues
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # fbtext
 Scraping posts, comments and replies from Facebook.
 ## How to use
@@ -43,3 +60,5 @@ where
 * `nReplies` is the upper-bound on number of replies per comment
 
 Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
+
+
