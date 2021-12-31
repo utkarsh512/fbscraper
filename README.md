@@ -1,13 +1,13 @@
-# fbtext
+# fbscraper
 Scraping posts, comments and replies from Facebook.
 ## How to use
-Install dependencies:
+Clone the repository ans install dependencies:
 ```bash
 $ pip install -r requirements.txt
 ```
 Create a `Session` object for scraping:
 ```python3
-from fbtext import Session
+from scraper import Session
 sess = Session(
     credentials=(EMAIL, 
                  PASSWORD), 
