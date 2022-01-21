@@ -1,4 +1,4 @@
-"""utils.py - Getters and parsers for fbscraper
+"""utils.py - Parsers for fbscraper
 Copyright (c) 2021 Utkarsh Patel
 """
 
@@ -20,7 +20,7 @@ CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
 def delay():
     """randomized delay"""
-    time.sleep(np.random.randint(5, 10))
+    time.sleep(np.random.randint(5, 15))
 
 def PKLtoJSON(old,
               new):
