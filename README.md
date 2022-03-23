@@ -1,13 +1,14 @@
 # fbscraper
 Scraping posts, comments and replies from Facebook.
 ## How to use
-Clone the repository ans install dependencies:
 ```bash
-$ pip install -r requirements.txt
+git clone https://github.com/utkarsh512/fbscraper.git
+cd fbscraper
+$ pip install . -r requirements.txt
 ```
 Create a `Session` object for scraping:
 ```python3
-from scraper import Session
+from fbscraper import Session
 sess = Session(
     credentials=(EMAIL, 
                  PASSWORD), 
@@ -42,4 +43,4 @@ where
 * `nComments` is the upper-bound on number of comments per post
 * `nReplies` is the upper-bound on number of replies per comment
 
-Just make sure postURL starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
+Just make sure `postURL` starts with `https://mbasic.facebook.com` instead of `https://www.facebook.com`, `https://mobile.facebook.com`, etc.
