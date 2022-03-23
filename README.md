@@ -2,8 +2,8 @@
 Scraping posts, comments and replies from Facebook.
 ## How to use
 ```bash
-git clone https://github.com/utkarsh512/fbscraper.git
-cd fbscraper
+$ git clone https://github.com/utkarsh512/fbscraper.git
+$ cd fbscraper
 $ pip install . -r requirements.txt
 ```
 Create a `Session` object for scraping:
