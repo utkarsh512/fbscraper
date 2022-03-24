@@ -10,8 +10,8 @@ DESCRIPTION = 'Scraping posts, comments and replies from Facebook'
 URL = 'https://github.com/utkarsh512/fbscraper'
 EMAIL = 'imutkarshpatel@gmail.com'
 AUTHOR = 'Utkarsh Patel'
-REQUIRES_PYTHON = '>=3.6.0'
-VERSION = 1.1
+REQUIRES_PYTHON = '>=3.7.0'
+VERSION = 1.0.0
 
 # Packages required
 REQUIRED = [
@@ -51,10 +51,9 @@ setup(
     #dependency_links=[],
     license='MIT',
     classifiers=[
-        'License :: MIT License',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
