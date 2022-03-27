@@ -11,7 +11,7 @@ $ pip install . -r requirements.txt
 ### Creating a session
 
 Create a `Session` object for scraping:
-```python3
+```python
 from fbscraper import Session
 sess = Session(
     credentials=(EMAIL, 
@@ -24,7 +24,7 @@ where `(EMAIL, PASSWORD)` are your facebook credentials and `chromeDriverPath` i
 ### Fetching post URLs from the public pages
 
 Then, you can extract recent post URLs of a public pages as
-```python3
+```python
 sess.getPage("nytimes")
 sess.scroll(10)
 postURLs = sess.getPostURLs()
@@ -33,7 +33,7 @@ postURLs = sess.getPostURLs()
 ### Scraping posts using the fetched URLs
 
 As you now have the list of URLs for the required posts, post data (including comments) can be scraped as
-```python3
+```python
 sess.getPost(
     postURL="https://mbasic.facebook.com/story.php?...",
     dump="posts.pkl",
